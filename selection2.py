@@ -23,6 +23,5 @@ for max_position in range(len(arr)-1, 0, -1):
 	min_position += 1
 	if max_position == min_position:
 		break
-	break
 
 print arr

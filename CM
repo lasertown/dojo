@@ -61,7 +61,6 @@ for host in things['names']:
 	for package in things['packages']:
 		package = 'apt-get -y install ' + package
 		args = ["ssh", host, package]
-		package = 'apt-get -y install ' + package
 		print 'Connecting to..' + host + '..installing..' + package
 		ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		result = ssh.stdout.readlines()

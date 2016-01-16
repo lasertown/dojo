@@ -84,7 +84,7 @@ if things['content']:
 				print ''.join(error)
 			else:
 				print 'Content',file[0],'has been copied to',host
-
+# Open ports
 if things['ports']:
 	for host in things['names']:
 			for port in things['ports']:

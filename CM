@@ -60,16 +60,14 @@ for host in things['names']:
 for host in things['names']:
 	for package in things['packages']:
 		package = 'apt-get -y install ' + package
+		args = ["ssh", host, package]
+		package = 'apt-get -y install ' + package
 		print 'Connecting to..' + host + '..installing..' + package
-		ssh = subprocess.Popen(["ssh", "%s" % host, package],
-		                       shell=False,
-		                       stdout=subprocess.PIPE,
-		                       stderr=subprocess.PIPE)
+		ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		result = ssh.stdout.readlines()
 		error = ssh.stderr.readlines()
 		if result == []:
-		    error = ssh.stderr.readlines()
-		    print >>sys.stderr, "ERROR: %s" % error
+		    print ''.join(error)
 		else:
 		    print ''.join(result)
 		    print ''.join(error)
@@ -86,7 +84,8 @@ if things['content']:
 				print ''.join(error)
 			else:
 				print 'Content',file[0],'has been copied to',host
-# Open ports
+
+# Opens ports
 if things['ports']:
 	for host in things['names']:
 			for port in things['ports']:

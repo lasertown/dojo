@@ -84,3 +84,16 @@ if things['content']:
 				print ''.join(error)
 			else:
 				print 'Content',file[0],'has been copied to',host
+
+if things['ports']:
+	for host in things['names']:
+			for port in things['ports']:
+				port = str(port)
+				args = ["ssh", host, "iptables -I INPUT -p tcp --dport "+ port +" -j ACCEPT"]
+				ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				result = ssh.stdout.readlines()
+				error = ssh.stderr.readlines()
+				if error != []:			
+					print ''.join(error)
+				else:
+					print 'Port: '+ port + " has been opened on " + host

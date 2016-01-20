@@ -7,6 +7,7 @@ import json
 stuff = open(sys.argv[1], 'r')
 things = json.load(stuff)
 STOP = None
+daemon = {'resolvconf': 'start/running', 'cron': 'start/running'}
 
 # Check free space on root partition
 for host in things['names']:
@@ -29,30 +30,34 @@ for host in things['names']:
 if STOP == True:
 	sys.exit("One or more hosts are at least 85% capacity, deployment is exiting now.")
 
-# Check if resolvconf is running
+# Check if services specified in json are running
 for host in things['names']:
-	args = ["ssh", host, "service", "resolvconf", "status"]
-	ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-	result = ssh.stdout.readlines()
-	error = ssh.stderr.readlines()
-	for a in result:
-		a = a.strip().split()
-		if a[1] == 'start/running':
-			print "resolvconf is running on",host
-		else:
-			print "resolvconf is not running on",host,"..Attempting restart.."
-			args = ["ssh", host, "service", "resolvconf", "force-reload"]
-			ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			result = ssh.stdout.readlines()
-			error = ssh.stderr.readlines()
-			if error != []:
-				print ''.join(error)
+	for service in things['services']:
+		args = ["ssh", host, "service", service, "status"]
+		ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+		result = ssh.stdout.readlines()
+		error = ssh.stderr.readlines()
+		for a in result:
+			a = a.strip().split()
+			if daemon[service] in a[1]:
+				print service,"is running on",host
 			else:
-				for a in result:
-					a = a.strip().split()
-					if a[1] == 'start/running':
-						print "resolvconf has been restarted and is now running."
-				print ''.join(result)
+				print service,"is not running on",host,"..Attempting restart.."
+				args = ["ssh", host, "service", service, "restart"]
+				print ' '.join(args)
+				ssh = subprocess.Popen(' '.join(args),shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				result = ssh.stdout.readlines()
+				error = ssh.stderr.readlines()
+				if error != []:
+					print ''.join(error)
+				else:
+					for a in result:
+						a = a.strip().split()
+						if daemon[service] in a[1]:
+							print service,"has been restarted and is now running."
+						else:
+							print service,"could not be restarted."
+					print ''.join(result)
 # Should CM check if a service is running?  Yes.  Should it try to start/restart it if its not?  Yes.
 # Should it break the CM run?  For now, I will say no.  Onwards.
 
